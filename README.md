@@ -37,7 +37,7 @@
 <!-- ═══════════════ 04 3D ═══════════════ -->
 <img src="./assets/sec-3d.svg" width="100%"/>
 <p align="center">
-  <img src="./profile-3d-contrib/profile-3d-hud.svg" width="100%" alt="3D contribution graph"/>
+  <img src="./profile-stats/calendar.svg" width="100%" alt="contribution grid"/>
 </p>
 <p align="center">
   <img src="https://github-readme-activity-graph.vercel.app/graph?username=pirathapanakshayan&bg_color=0A0A0A&color=C9C9C9&line=FFD600&point=FFFFFF&area=true&area_color=FFD600&hide_border=true&title_color=FFD600"/>

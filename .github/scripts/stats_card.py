@@ -175,11 +175,90 @@ def build(s):
     print('wrote', OUT, f'{len(svg) // 1024} KB | streak', cur, '| longest', longest)
 
 
+LEVELS = ['#1C1C1C', '#4A3E00', '#8A7200', '#C9A600', '#FFD600']
+
+
+def level(c, mx):
+    if c <= 0:
+        return 0
+    if mx <= 4:
+        return min(4, c)
+    return min(4, 1 + int((c - 1) * 4 / mx))
+
+
+def build_calendar(s):
+    """GitHub-style contribution grid in the HUD theme -> profile-stats/calendar.svg"""
+    days = sorted(s['days'])
+    first = dt.date.fromisoformat(days[0][0])
+    start = first - dt.timedelta(days=(first.weekday() + 1) % 7)   # back to Sunday
+    mx = max([c for _, c in days] + [1])
+    today = dt.date.today().isoformat()
+    cell, gap, x0, y0 = 16, 4, 84, 92
+    step = cell + gap
+    cells, months, last_month, last_label_col = '', '', None, -10
+    ncols = 0
+    for d, c in days:
+        date = dt.date.fromisoformat(d)
+        col = (date - start).days // 7
+        row = (date.weekday() + 1) % 7
+        ncols = max(ncols, col + 1)
+        x, y = x0 + col * step, y0 + row * step
+        lv = level(c, mx)
+        extra = ''
+        if d == today:
+            extra = f'<rect x="{x - 2.5}" y="{y - 2.5}" width="{cell + 5}" height="{cell + 5}" fill="none" stroke="#FFFFFF" stroke-width="1.2" class="blink"/>'
+        cls = ' class="c"' if lv else ''
+        cells += (f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="2" fill="{LEVELS[lv]}"'
+                  f'{cls} style="animation-delay:{col * 0.025:.2f}s"><title>{c} on {d}</title></rect>{extra}')
+        if row == 0 and date.month != last_month:
+            if col - last_label_col >= 3 and col < 52:
+                months += f'<text x="{x}" y="{y0 - 14}" class="m" font-size="12" fill="{SIL}">{date.strftime("%b").upper()}</text>'
+                last_label_col = col
+            last_month = date.month
+    gx1 = x0 + ncols * step
+    days_lbl = ''.join(f'<text x="{x0 - 12}" y="{y0 + r * step + 12}" class="m" font-size="11" fill="{DIM}" text-anchor="end">{n}</text>'
+                       for r, n in ((1, 'MON'), (3, 'WED'), (5, 'FRI')))
+    legend_x = gx1 - 5 * step - 44
+    legend = ''.join(f'<rect x="{legend_x + 40 + i * step}" y="250" width="{cell}" height="{cell}" rx="2" fill="{c}"/>' for i, c in enumerate(LEVELS))
+    W, H = 1200, 300
+    frame = 'M10 10H700L726 36H1190V262L1162 290H10Z'
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">
+<defs><style>{font_face('HUD', 'chakra-petch-700.woff2')}{font_face('MONO', 'share-tech-mono-400.woff2')}
+.d{{font-family:'HUD',sans-serif;font-weight:700}}.m{{font-family:'MONO',monospace}}
+.c{{animation:pop .6s ease-out both}}@keyframes pop{{from{{opacity:0}}to{{opacity:1}}}}
+.blink{{animation:blink 1.2s steps(1) infinite}}@keyframes blink{{50%{{opacity:0}}}}
+.scan{{animation:scan 6s linear infinite}}@keyframes scan{{from{{transform:translateX(0)}}to{{transform:translateX({gx1 - x0}px)}}}}
+.flow{{stroke-dasharray:60 1400;animation:flow 6s linear infinite}}@keyframes flow{{from{{stroke-dashoffset:1460}}to{{stroke-dashoffset:0}}}}
+</style>
+<pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><rect width="1.4" height="1.4" fill="#262626"/></pattern>
+<linearGradient id="sg" x1="0" x2="1"><stop offset="0" stop-color="{Y}" stop-opacity="0"/><stop offset="1" stop-color="{Y}" stop-opacity=".25"/></linearGradient>
+<clipPath id="gc"><rect x="{x0}" y="{y0}" width="{gx1 - x0}" height="{7 * step}"/></clipPath></defs>
+<path d="{frame}" fill="{PNL}" stroke="{LINE}" stroke-width="1.5"/>
+<path d="{frame}" fill="url(#dots)"/>
+<path d="M10 10H700L726 36H1190" fill="none" stroke="{Y}" stroke-width="1.5" class="flow"/>
+<text x="40" y="52" class="m" font-size="13" fill="{DIM}">&gt;</text>
+<text x="56" y="52" class="d" font-size="16" fill="{Y}" letter-spacing="3">CONTRIBUTION_MATRIX</text>
+<text x="1160" y="56" class="d" font-size="22" fill="#FFFFFF" text-anchor="end">{s["total"]}<tspan class="m" font-size="12" fill="{SIL}" dx="8">CONTRIBUTIONS // LAST YEAR</tspan></text>
+{months}{days_lbl}
+{cells}
+<g clip-path="url(#gc)"><rect class="scan" x="{x0 - 60}" y="{y0}" width="60" height="{7 * step}" fill="url(#sg)"/></g>
+<text x="40" y="262" class="m" font-size="10" fill="{DIM}" letter-spacing="2">SYNC // {dt.date.today().isoformat()} // AUTO-UPDATED DAILY</text>
+<text x="{legend_x}" y="262" class="m" font-size="11" fill="{DIM}">LESS</text>{legend}
+<text x="{legend_x + 44 + 5 * step}" y="262" class="m" font-size="11" fill="{DIM}">MORE</text>
+</svg>'''
+    out = os.path.join(ROOT, 'profile-stats', 'calendar.svg')
+    with open(out, 'w') as fh:
+        fh.write(svg)
+    print('wrote', out, f'{len(svg) // 1024} KB')
+
+
 if __name__ == '__main__':
     if '--demo' in sys.argv:
         today = dt.date.today()
-        days = [((today - dt.timedelta(days=i)).isoformat(), 1 if i in (0, 66, 67, 68, 120) else 0) for i in range(365)]
-        build({'stars': 0, 'commits': 22, 'prs': 0, 'issues': 0, 'contributed': 1, 'total': 26, 'days': days,
-               'langs': {'Python': 52000, 'TypeScript': 9000, 'HTML': 6000, 'CSS': 3000, 'JavaScript': 1500}})
+        days = [((today - dt.timedelta(days=i)).isoformat(), {0: 2, 1: 6, 2: 3, 30: 4, 66: 1, 67: 1, 68: 2, 120: 1, 200: 1, 250: 1}.get(i, 0)) for i in range(366)]
+        data = {'stars': 0, 'commits': 22, 'prs': 0, 'issues': 0, 'contributed': 1, 'total': 26, 'days': days,
+                'langs': {'Python': 52000, 'TypeScript': 9000, 'HTML': 6000, 'CSS': 3000, 'JavaScript': 1500}}
     else:
-        build(fetch())
+        data = fetch()
+    build(data)
+    build_calendar(data)

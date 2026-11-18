@@ -1,4 +1,4 @@
-name: Generate 3D contribution graph
+name: Update profile stats
 
 on:
   schedule:
@@ -14,13 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: yoshi389111/github-profile-3d-contrib@v0.9.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USERNAME: ${{ github.repository_owner }}
-          SETTING_JSON: ./.github/3d-hud.json
-
-      - name: Build SYSTEM_STATS card
+      - name: Build SYSTEM_STATS + contribution grid
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -31,5 +25,5 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add -A .
-          git commit -m "update 3D contribution graph" || echo "no changes"
+          git commit -m "update profile stats" || echo "no changes"
           git push
