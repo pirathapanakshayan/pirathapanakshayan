@@ -17,6 +17,7 @@ jobs:
       - name: Build SYSTEM_STATS, contribution grid + activity log
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATS_TOKEN: ${{ secrets.STATS_TOKEN }}   # optional: read-only PAT so private repos count too
           USERNAME: ${{ github.repository_owner }}
         run: python3 .github/scripts/stats_card.py
 

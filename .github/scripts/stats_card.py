@@ -34,7 +34,7 @@ def fetch():
     req = urllib.request.Request(
         'https://api.github.com/graphql',
         data=json.dumps({'query': QUERY, 'variables': {'login': USER}}).encode(),
-        headers={'Authorization': 'bearer ' + os.environ['GITHUB_TOKEN'], 'Content-Type': 'application/json'})
+        headers={'Authorization': 'bearer ' + (os.environ.get('STATS_TOKEN') or os.environ['GITHUB_TOKEN']), 'Content-Type': 'application/json'})
     data = json.load(urllib.request.urlopen(req))
     if 'errors' in data:
         raise SystemExit('GraphQL error: ' + json.dumps(data['errors']))
