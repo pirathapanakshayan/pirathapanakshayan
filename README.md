@@ -30,13 +30,7 @@
 
 <!-- ═══════════════ 03 STATS ═══════════════ -->
 <img src="./assets/sec-stats.svg" width="100%"/>
-<p align="center">
-  <img height="170" src="https://github-readme-stats.vercel.app/api?username=pirathapanakshayan&show_icons=true&bg_color=0A0A0A&title_color=FFD600&text_color=C9C9C9&icon_color=FFD600&ring_color=FFD600&border_color=2A2A2A&rank_icon=github"/>
-  <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=pirathapanakshayan&layout=compact&bg_color=0A0A0A&title_color=FFD600&text_color=C9C9C9&border_color=2A2A2A"/>
-</p>
-<p align="center">
-  <img src="https://streak-stats.demolab.com?user=pirathapanakshayan&background=0A0A0A&border=2A2A2A&stroke=2A2A2A&ring=FFD600&fire=FFD600&currStreakNum=FFFFFF&sideNums=C9C9C9&currStreakLabel=FFD600&sideLabels=C9C9C9&dates=6B6B6B"/>
-</p>
+<p align="center"><img src="./profile-stats/stats.svg" width="100%" alt="system stats"/></p>
 
 <img src="./assets/divider.svg" width="100%"/>
 
