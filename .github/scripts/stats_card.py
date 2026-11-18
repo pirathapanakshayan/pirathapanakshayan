@@ -252,6 +252,99 @@ def build_calendar(s):
     print('wrote', out, f'{len(svg) // 1024} KB')
 
 
+def build_activity(s):
+    """Animated 31-day activity line chart -> profile-stats/activity.svg"""
+    today = dt.date.today().isoformat()
+    days = [d for d in sorted(s['days']) if d[0] <= today][-31:]
+    counts = [c for _, c in days]
+    peak = max(counts + [0])
+    top = max(4, peak + (4 - peak % 4) % 4)          # nice y max (multiple of 4)
+    X0, X1, Y0, Y1 = 90, 1150, 92, 236                 # plot box
+    n = len(days)
+    xs = [X0 + i * (X1 - X0) / (n - 1) for i in range(n)]
+    ys = [Y1 - c * (Y1 - Y0) / top for c in counts]
+
+    # smooth path (Catmull-Rom -> cubic Bezier), control points clamped inside the box
+    def clamp(v):
+        return max(Y0, min(Y1, v))
+    d = f'M{xs[0]:.1f} {ys[0]:.1f}'
+    for i in range(n - 1):
+        p0 = (xs[i - 1], ys[i - 1]) if i else (xs[i], ys[i])
+        p1, p2 = (xs[i], ys[i]), (xs[i + 1], ys[i + 1])
+        p3 = (xs[i + 2], ys[i + 2]) if i + 2 < n else p2
+        c1 = (p1[0] + (p2[0] - p0[0]) / 6, clamp(p1[1] + (p2[1] - p0[1]) / 6))
+        c2 = (p2[0] - (p3[0] - p1[0]) / 6, clamp(p2[1] - (p3[1] - p1[1]) / 6))
+        d += f' C{c1[0]:.1f} {c1[1]:.1f} {c2[0]:.1f} {c2[1]:.1f} {p2[0]:.1f} {p2[1]:.1f}'
+    area = d + f' L{xs[-1]:.1f} {Y1} L{xs[0]:.1f} {Y1} Z'
+
+    grid = ''
+    for k in range(5):
+        v = top * k / 4
+        y = Y1 - k * (Y1 - Y0) / 4
+        grid += (f'<line x1="{X0}" x2="{X1}" y1="{y:.1f}" y2="{y:.1f}" stroke="{LINE}" stroke-dasharray="{"0" if k == 0 else "2 6"}"/>'
+                 f'<text x="{X0 - 14}" y="{y + 4:.1f}" class="m" font-size="11" fill="{DIM}" text-anchor="end">{v:g}</text>')
+    xl = ''
+    for i, (date, c) in enumerate(days):
+        dd = dt.date.fromisoformat(date)
+        hi = dd.day == 1 or i == 0
+        lbl = dd.strftime('%b').upper() if hi else str(dd.day)
+        xl += (f'<line x1="{xs[i]:.1f}" x2="{xs[i]:.1f}" y1="{Y1}" y2="{Y1 + 5}" stroke="{Y if hi else DIM}"/>'
+               f'<text x="{xs[i]:.1f}" y="{Y1 + 20}" class="m" font-size="{11 if hi else 10}" fill="{Y if hi else DIM}" text-anchor="middle">{lbl}</text>')
+    dots = ''
+    for i, c in enumerate(counts):
+        delay = 0.3 + 1.8 * i / (n - 1)
+        if c > 0:
+            dots += (f'<g class="pop" style="animation-delay:{delay:.2f}s;transform-origin:{xs[i]:.1f}px {ys[i]:.1f}px">'
+                     f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="5.5" fill="{BLK}" stroke="{Y}" stroke-width="2"/>'
+                     f'<text x="{xs[i]:.1f}" y="{ys[i] - 13:.1f}" class="d" font-size="13" fill="#FFFFFF" text-anchor="middle">{c}</text>'
+                     f'<title>{c} on {days[i][0]}</title></g>')
+        else:
+            dots += f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="2.5" fill="{DIM}" class="pop" style="animation-delay:{delay:.2f}s;transform-origin:{xs[i]:.1f}px {ys[i]:.1f}px"><title>0 on {days[i][0]}</title></circle>'
+    # pulsing marker on today
+    dots += (f'<circle cx="{xs[-1]:.1f}" cy="{ys[-1]:.1f}" r="10" fill="none" stroke="{Y}" class="ping" '
+             f'style="transform-origin:{xs[-1]:.1f}px {ys[-1]:.1f}px"/>')
+
+    total = sum(counts)
+    active = sum(1 for c in counts if c)
+    frame = 'M10 10H700L726 36H1190V262L1162 290H10Z'
+    W, H = 1200, 300
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">
+<defs><style>{font_face('HUD', 'chakra-petch-700.woff2')}{font_face('MONO', 'share-tech-mono-400.woff2')}
+.d{{font-family:'HUD',sans-serif;font-weight:700}}.m{{font-family:'MONO',monospace}}
+.line{{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.2s ease-out .3s forwards}}@keyframes draw{{to{{stroke-dashoffset:0}}}}
+.area{{opacity:0;animation:fade 1s ease 1.6s forwards}}@keyframes fade{{to{{opacity:1}}}}
+.pop{{opacity:0;animation:pop .35s ease-out forwards}}@keyframes pop{{from{{opacity:0;transform:scale(0)}}to{{opacity:1;transform:scale(1)}}}}
+.ping{{opacity:0;animation:ping 1.8s ease-out 2.6s infinite}}@keyframes ping{{0%{{opacity:.9;transform:scale(.5)}}100%{{opacity:0;transform:scale(2)}}}}
+.scan{{animation:scan 5s linear infinite}}@keyframes scan{{from{{transform:translateX(0)}}to{{transform:translateX({X1 - X0}px)}}}}
+.blink{{animation:blink 1.2s steps(1) infinite}}@keyframes blink{{50%{{opacity:0}}}}
+.flow{{stroke-dasharray:60 1400;animation:flow 6s linear infinite}}@keyframes flow{{from{{stroke-dashoffset:1460}}to{{stroke-dashoffset:0}}}}
+</style>
+<pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><rect width="1.4" height="1.4" fill="#262626"/></pattern>
+<linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{Y}" stop-opacity=".35"/><stop offset="1" stop-color="{Y}" stop-opacity="0"/></linearGradient>
+<linearGradient id="sg" x1="0" x2="1"><stop offset="0" stop-color="{Y}" stop-opacity="0"/><stop offset="1" stop-color="{Y}" stop-opacity=".18"/></linearGradient>
+<filter id="glow" x="-5%" y="-30%" width="110%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<clipPath id="pc"><rect x="{X0}" y="{Y0 - 30}" width="{X1 - X0}" height="{Y1 - Y0 + 30}"/></clipPath></defs>
+<path d="{frame}" fill="{PNL}" stroke="{LINE}" stroke-width="1.5"/>
+<path d="{frame}" fill="url(#dots)"/>
+<path d="M10 10H700L726 36H1190" fill="none" stroke="{Y}" stroke-width="1.5" class="flow"/>
+<text x="40" y="52" class="m" font-size="13" fill="{DIM}">&gt;</text>
+<text x="56" y="52" class="d" font-size="16" fill="{Y}" letter-spacing="3">ACTIVITY_LOG</text>
+<text x="250" y="52" class="m" font-size="12" fill="{SIL}">// LAST 31 DAYS</text>
+<circle cx="372" cy="48" r="4" fill="{Y}" class="blink"/>
+<text x="1160" y="56" class="m" font-size="12" fill="{SIL}" text-anchor="end">TOTAL <tspan class="d" font-size="18" fill="#FFFFFF">{total}</tspan>  ·  PEAK <tspan class="d" font-size="18" fill="{Y}">{peak}</tspan>  ·  ACTIVE <tspan class="d" font-size="18" fill="#FFFFFF">{active}</tspan>D</text>
+{grid}{xl}
+<g clip-path="url(#pc)"><rect class="scan" x="{X0 - 50}" y="{Y0 - 30}" width="50" height="{Y1 - Y0 + 30}" fill="url(#sg)"/></g>
+<path d="{area}" fill="url(#ag)" class="area"/>
+<path d="{d}" fill="none" stroke="{Y}" stroke-width="3" stroke-linecap="round" pathLength="1" class="line" filter="url(#glow)"/>
+{dots}
+<text x="40" y="280" class="m" font-size="10" fill="{DIM}" letter-spacing="2">SYNC // {today} // AUTO-UPDATED DAILY</text>
+</svg>'''
+    out = os.path.join(ROOT, 'profile-stats', 'activity.svg')
+    with open(out, 'w') as fh:
+        fh.write(svg)
+    print('wrote', out, f'{len(svg) // 1024} KB')
+
+
 if __name__ == '__main__':
     if '--demo' in sys.argv:
         today = dt.date.today()
@@ -262,3 +355,4 @@ if __name__ == '__main__':
         data = fetch()
     build(data)
     build_calendar(data)
+    build_activity(data)
