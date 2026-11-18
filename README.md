@@ -9,9 +9,9 @@
 
 <p align="center">
   <a href="https://github.com/pirathapanakshayan"><img src="https://img.shields.io/badge/GITHUB-0A0A0A?style=for-the-badge&logo=github&logoColor=FFD600&labelColor=0A0A0A"/></a>
-  <a href="https://www.linkedin.com/in/pirathapanakshayan"><img src="https://img.shields.io/badge/LINKEDIN-FFD600?style=for-the-badge&logo=linkedin&logoColor=0A0A0A"/></a>
-  <a href="mailto:pirathapanakshayan@gmail.com"><img src="https://img.shields.io/badge/EMAIL-C9C9C9?style=for-the-badge&logo=gmail&logoColor=0A0A0A"/></a>
-  <img src="https://komarev.com/ghpvc/?username=pirathapanakshayan&style=for-the-badge&color=FFD600&label=VISITORS"/>
+  <a href="https://www.linkedin.com/in/pirathapanakshayan"><img src="https://img.shields.io/badge/LINKEDIN-0A0A0A?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI0ZGRDYwMCIgZD0iTTIwLjQ0NyAyMC40NTJoLTMuNTU0di01LjU2OWMwLTEuMzI4LS4wMjctMy4wMzctMS44NTItMy4wMzctMS44NTMgMC0yLjEzNiAxLjQ0NS0yLjEzNiAyLjkzOXY1LjY2N0g5LjM1MVY5aDMuNDE0djEuNTYxaC4wNDZjLjQ3Ny0uOSAxLjYzNy0xLjg1IDMuMzctMS44NSAzLjYwMSAwIDQuMjY3IDIuMzcgNC4yNjcgNS40NTV2Ni4yODZ6TTUuMzM3IDcuNDMzYy0xLjE0NCAwLTIuMDYzLS45MjYtMi4wNjMtMi4wNjUgMC0xLjEzOC45Mi0yLjA2MyAyLjA2My0yLjA2MyAxLjE0IDAgMi4wNjQuOTI1IDIuMDY0IDIuMDYzIDAgMS4xMzktLjkyNSAyLjA2NS0yLjA2NCAyLjA2NXptMS43ODIgMTMuMDE5SDMuNTU1VjloMy41NjR2MTEuNDUyek0yMi4yMjUgMEgxLjc3MUMuNzkyIDAgMCAuNzc0IDAgMS43Mjl2MjAuNTQyQzAgMjMuMjI3Ljc5MiAyNCAxLjc3MSAyNGgyMC40NTFDMjMuMiAyNCAyNCAyMy4yMjcgMjQgMjIuMjcxVjEuNzI5QzI0IC43NzQgMjMuMiAwIDIyLjIyMiAwaC4wMDN6Ii8%2BPC9zdmc%2B&labelColor=0A0A0A"/></a>
+  <a href="mailto:pirathapanakshayan@gmail.com"><img src="https://img.shields.io/badge/EMAIL-0A0A0A?style=for-the-badge&logo=gmail&logoColor=FFD600&labelColor=0A0A0A"/></a>
+  <img src="https://komarev.com/ghpvc/?username=pirathapanakshayan&style=for-the-badge&color=0A0A0A&labelColor=0A0A0A&label=%F0%9F%91%81%20VISITORS"/>
 </p>
 
 <img src="./assets/divider.svg" width="100%"/>
