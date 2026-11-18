@@ -1,66 +1,53 @@
-<!-- ░░ HEADER ░░ -->
+<!-- ═══════════════ HEADER ═══════════════ -->
 <p align="center">
-  <img src="./assets/header.svg" width="100%" alt="header"/>
+  <img src="./assets/header.svg" width="100%" alt="PIRATHAPAN // HUD header"/>
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Space+Mono&size=18&duration=3000&pause=800&color=BCBCBC&center=true&vCenter=true&width=600&lines=quietly+building+things+in+the+dark.;learning+cybersecurity+%40+pwn.college;turning+coffee+into+code." alt="typing"/>
+  <img src="https://readme-typing-svg.demolab.com?font=Chakra+Petch&weight=600&size=20&duration=2800&pause=900&color=FFD600&center=true&vCenter=true&width=640&lines=%3E%3E+INITIALIZING+PROFILE...;%3E%3E+LEARNING+ARTIFICIAL+INTELLIGENCE;%3E%3E+LEARNING+CYBERSECURITY+%40+PWN.COLLEGE;%3E%3E+ALL+SYSTEMS+OPERATIONAL" alt="typing"/>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pirathapanakshayan"><img src="https://img.shields.io/badge/GitHub-0F0F0F?style=for-the-badge&logo=github&logoColor=DEDEDE"/></a>
-  <a href="https://linkedin.com/in/YOUR_LINKEDIN"><img src="https://img.shields.io/badge/LinkedIn-2B2B2B?style=for-the-badge&logo=linkedin&logoColor=DEDEDE"/></a>
-  <a href="mailto:YOUR_EMAIL"><img src="https://img.shields.io/badge/Email-4D4D4D?style=for-the-badge&logo=gmail&logoColor=DEDEDE"/></a>
-  <img src="https://komarev.com/ghpvc/?username=pirathapanakshayan&style=for-the-badge&color=717171&label=VISITORS"/>
-</p>
-
-<img src="./assets/divider.svg" width="100%"/>
-
-## ◼ about me
-
-```yaml
-name      : Pirathapan
-role      : Student · Developer
-learning  : Cybersecurity, Linux, C
-building  : things that live in the terminal
-motto     : "less noise, more signal."
-```
-
-<img src="./assets/divider.svg" width="100%"/>
-
-## ◼ stack
-
-<p align="center">
-  <img src="https://skillicons.dev/icons?i=c,cpp,python,js,html,css,git,github,linux,bash,vscode,figma&perline=6&theme=dark"/>
+  <a href="https://github.com/pirathapanakshayan"><img src="https://img.shields.io/badge/GITHUB-0A0A0A?style=for-the-badge&logo=github&logoColor=FFD600&labelColor=0A0A0A"/></a>
+  <a href="https://www.linkedin.com/in/pirathapanakshayan"><img src="https://img.shields.io/badge/LINKEDIN-FFD600?style=for-the-badge&logo=linkedin&logoColor=0A0A0A"/></a>
+  <a href="mailto:pirathapanakshayan@gmail.com"><img src="https://img.shields.io/badge/EMAIL-C9C9C9?style=for-the-badge&logo=gmail&logoColor=0A0A0A"/></a>
+  <img src="https://komarev.com/ghpvc/?username=pirathapanakshayan&style=for-the-badge&color=FFD600&label=VISITORS"/>
 </p>
 
 <img src="./assets/divider.svg" width="100%"/>
 
-## ◼ stats
+<!-- ═══════════════ 01 ABOUT ═══════════════ -->
+<img src="./assets/sec-about.svg" width="100%"/>
+<p align="center"><img src="./assets/about.svg" width="100%"/></p>
 
+<img src="./assets/divider.svg" width="100%"/>
+
+<!-- ═══════════════ 02 STACK ═══════════════ -->
+<img src="./assets/sec-stack.svg" width="100%"/>
+<p align="center"><img src="./assets/stack.svg" width="100%" alt="tech stack"/></p>
+
+<img src="./assets/divider.svg" width="100%"/>
+
+<!-- ═══════════════ 03 STATS ═══════════════ -->
+<img src="./assets/sec-stats.svg" width="100%"/>
 <p align="center">
-  <img height="170" src="https://github-readme-stats.vercel.app/api?username=pirathapanakshayan&show_icons=true&hide_border=true&bg_color=0F0F0F&title_color=DEDEDE&text_color=BCBCBC&icon_color=979797&ring_color=DEDEDE&rank_icon=github"/>
-  <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=pirathapanakshayan&layout=compact&hide_border=true&bg_color=0F0F0F&title_color=DEDEDE&text_color=BCBCBC"/>
+  <img height="170" src="https://github-readme-stats.vercel.app/api?username=pirathapanakshayan&show_icons=true&bg_color=0A0A0A&title_color=FFD600&text_color=C9C9C9&icon_color=FFD600&ring_color=FFD600&border_color=2A2A2A&rank_icon=github"/>
+  <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=pirathapanakshayan&layout=compact&bg_color=0A0A0A&title_color=FFD600&text_color=C9C9C9&border_color=2A2A2A"/>
 </p>
-
 <p align="center">
-  <img src="https://streak-stats.demolab.com?user=pirathapanakshayan&hide_border=true&background=0F0F0F&ring=DEDEDE&fire=BCBCBC&currStreakNum=FFFFFF&sideNums=DEDEDE&currStreakLabel=DEDEDE&sideLabels=979797&dates=717171&stroke=4D4D4D"/>
+  <img src="https://streak-stats.demolab.com?user=pirathapanakshayan&background=0A0A0A&border=2A2A2A&stroke=2A2A2A&ring=FFD600&fire=FFD600&currStreakNum=FFFFFF&sideNums=C9C9C9&currStreakLabel=FFD600&sideLabels=C9C9C9&dates=6B6B6B"/>
 </p>
 
 <img src="./assets/divider.svg" width="100%"/>
 
-## ◼ contributions in 3D
-
+<!-- ═══════════════ 04 3D ═══════════════ -->
+<img src="./assets/sec-3d.svg" width="100%"/>
 <p align="center">
-  <img src="./profile-3d-contrib/profile-3d-mono.svg" width="100%" alt="3D contribution graph"/>
+  <img src="./profile-3d-contrib/profile-3d-hud.svg" width="100%" alt="3D contribution graph"/>
+</p>
+<p align="center">
+  <img src="https://github-readme-activity-graph.vercel.app/graph?username=pirathapanakshayan&bg_color=0A0A0A&color=C9C9C9&line=FFD600&point=FFFFFF&area=true&area_color=FFD600&hide_border=true&title_color=FFD600"/>
 </p>
 
-<p align="center">
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=pirathapanakshayan&bg_color=0F0F0F&color=BCBCBC&line=DEDEDE&point=FFFFFF&area=true&area_color=4D4D4D&hide_border=true&title_color=DEDEDE"/>
-</p>
-
-<img src="./assets/divider.svg" width="100%"/>
-
-<p align="center">
-  <sub>// made in monochrome · <b>pirathapanakshayan</b></sub>
-</p>
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<img src="./assets/footer.svg" width="100%"/>

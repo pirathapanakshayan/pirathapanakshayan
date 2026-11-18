@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="36" viewBox="0 0 1200 36">
+<defs><style>.run{animation:run 4.5s ease-in-out infinite}@keyframes run{0%{transform:translateX(-240px)}100%{transform:translateX(1200px)}}
+.b{animation:b 1.2s steps(1) infinite}@keyframes b{50%{opacity:0}}</style>
+<linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#FFD600" stop-opacity="0"/><stop offset=".5" stop-color="#FFD600"/><stop offset="1" stop-color="#FFD600" stop-opacity="0"/></linearGradient>
+<pattern id="haz" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="10" fill="#FFD600"/></pattern></defs>
+<rect x="0" y="12" width="44" height="12" fill="url(#haz)"/>
+<path d="M56 18H560L570 10H630L640 18H1144" fill="none" stroke="#2A2A2A" stroke-width="1.5"/>
+<rect class="run" x="0" y="17" width="240" height="2" fill="url(#g)"/>
+<path d="M600 8l8 10-8 10-8-10z" fill="#FFD600" class="b"/>
+<rect x="1156" y="12" width="44" height="12" fill="url(#haz)"/>
+</svg>
