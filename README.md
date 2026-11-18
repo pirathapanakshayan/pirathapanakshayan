@@ -13,7 +13,6 @@
   <a href="mailto:pirathapanakshayan@gmail.com"><img src="https://img.shields.io/badge/EMAIL-0A0A0A?style=for-the-badge&logo=gmail&logoColor=FFD600&labelColor=0A0A0A"/></a>
   <!-- PORTFOLIO: replace the href below with your portfolio link when it is live -->
   <a href="https://github.com/pirathapanakshayan"><img src="https://img.shields.io/badge/PORTFOLIO-0A0A0A?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZENjAwIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8%2BPHBhdGggZD0iTTIgMTJoMjBNMTIgMmExNSAxNSAwIDAgMSAwIDIwTTEyIDJhMTUgMTUgMCAwIDAgMCAyMCIvPjwvc3ZnPg%3D%3D&labelColor=0A0A0A"/></a>
-  <img src="https://hits.sh/github.com/pirathapanakshayan.svg?style=for-the-badge&label=%F0%9F%91%81%20VISITORS&labelColor=0A0A0A&color=0A0A0A&extraCount=20"/>
 </p>
 
 <img src="./assets/divider.svg" width="100%"/>
