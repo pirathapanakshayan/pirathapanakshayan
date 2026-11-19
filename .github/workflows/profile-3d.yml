@@ -19,6 +19,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STATS_TOKEN: ${{ secrets.STATS_TOKEN }}   # optional: read-only PAT so private repos count too
           USERNAME: ${{ github.repository_owner }}
+          TZ: Asia/Colombo   # count days in Sri Lanka time, like github.com
         run: python3 .github/scripts/stats_card.py
 
       - name: Commit & push

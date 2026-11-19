@@ -3,7 +3,7 @@
 Runs inside GitHub Actions with GITHUB_TOKEN. Writes profile-stats/stats.svg.
 Local preview without network:  python3 stats_card.py --demo
 """
-import base64, datetime as dt, json, os, sys, urllib.request
+import base64, datetime as dt, json, os, sys, urllib.parse, urllib.request
 
 USER = os.environ.get('USERNAME', 'pirathapanakshayan')
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +55,7 @@ def fetch():
         stars += r['stargazerCount']
         for e in r['languages']['edges']:
             langs[e['node']['name']] = langs.get(e['node']['name'], 0) + e['size']
-    return {
+    out = {
         'stars': stars,
         'commits': cc['totalCommitContributions'] + cc['restrictedContributionsCount'],
         'prs': u['pullRequests']['totalCount'],
@@ -65,6 +65,40 @@ def fetch():
         'days': [(d['date'], d['contributionCount']) for d in days],
         'langs': langs,
     }
+    # Prefer GitHub's own profile calendar, rendered in the local time zone,
+    # so days and streaks match exactly what github.com shows.
+    try:
+        local = fetch_profile_calendar()
+        if local:
+            out['days'], out['total'] = local
+            print('DEBUG using profile calendar (local time):', out['total'], out['days'][-5:])
+    except Exception as e:  # keep the API data if GitHub changes the page
+        print('DEBUG profile calendar unavailable:', e)
+    return out
+
+
+def fetch_profile_calendar():
+    import re
+    tz = os.environ.get('TZ', 'UTC')
+    req = urllib.request.Request(
+        f'https://github.com/users/{USER}/contributions',
+        headers={'Cookie': 'tz=' + urllib.parse.quote(tz, safe=''), 'User-Agent': 'profile-stats'})
+    html = urllib.request.urlopen(req, timeout=30).read().decode()
+    dates = dict(re.findall(r'data-date="(\d{4}-\d\d-\d\d)"\s+id="([^"]+)"', html))
+    dates = {v: k for k, v in dates.items()}  # id -> date
+    if not dates:
+        dates = {i: d for d, i in re.findall(r'data-date="(\d{4}-\d\d-\d\d)"[^>]*?\bid="([^"]+)"', html)}
+    tips = dict(re.findall(r'<tool-tip[^>]*\bfor="([^"]+)"[^>]*>\s*([^<]+?)\s*</tool-tip>', html))
+    days = []
+    for cid, d in dates.items():
+        m = re.match(r'(\d+) contribution', tips.get(cid, ''))
+        days.append((d, int(m.group(1)) if m else 0))
+    if len(days) < 300:
+        return None
+    days.sort()
+    m = re.search(r'([\d,]+)\s+contributions?\s+in the last year', html)
+    total = int(m.group(1).replace(',', '')) if m else sum(c for _, c in days)
+    return days, total
 
 
 def streaks(days):
