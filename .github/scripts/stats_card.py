@@ -130,11 +130,33 @@ def esc(s):
     return str(s).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
 
-def build(s):
-    cur, longest = streaks(s['days'])
-    W, H = 1200, 300
+GH_MARK = ('M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 '
+           '1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 '
+           '0-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.6.2 2.8.1 3.2.8.8 1.3 1.9 1.3 3.2 0 4.6-2.9 '
+           '5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3')
+FLAME = ('M0 -16 C6 -8 10 -3 10 4 C10 11 5 16 0 16 C-5 16 -10 11 -10 4 C-10 -2 -6 -6 -4 -10 '
+         'C-3 -5 -1 -3 1 -2 C2 -7 1 -12 0 -16 Z')
 
-    # ---- panel A: telemetry rows
+
+def ring(cx, cy, r, cls, extra=''):
+    """HUD ring: spinning ticks + grey track + animated yellow arc"""
+    ticks = ''.join(
+        f'<line x1="{cx}" y1="{cy - r - 15}" x2="{cx}" y2="{cy - r - (9 if i % 3 else 5)}" '
+        f'stroke="{Y if i % 6 == 0 else "#3a3a3a"}" stroke-width="2" transform="rotate({i * 10} {cx} {cy})"/>'
+        for i in range(36))
+    return (f'<g class="spin" style="transform-origin:{cx}px {cy}px">{ticks}</g>'
+            f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{BLK}" stroke="#2a2a2a" stroke-width="6"/>'
+            f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{Y}" stroke-width="6" stroke-linecap="round" '
+            f'class="{cls}" transform="rotate(-90 {cx} {cy})"{extra}/>')
+
+
+def build(s):
+    cur, cs, ce, (lng, ls, le), first = streak_info(s['days'])
+    W, H = 1200, 300
+    R = 46
+    circ = 2 * 3.14159 * R
+
+    # ---- panel A: telemetry rows + GitHub logo ring
     rows = [('STARS EARNED', s['stars']), ('COMMITS // 1Y', s['commits']), ('PULL REQUESTS', s['prs']),
             ('ISSUES', s['issues']), ('CONTRIBUTED TO', s['contributed'])]
     a = ''
@@ -143,34 +165,54 @@ def build(s):
         a += (f'<g class="row" style="animation-delay:{0.2 + i * 0.15:.2f}s">'
               f'<rect x="46" y="{y - 10}" width="6" height="6" fill="{Y if i == 1 else DIM}"/>'
               f'<text x="64" y="{y}" class="m" font-size="14" fill="{SIL}">{k}</text>'
-              f'<line x1="{80 + len(k) * 7.7:.0f}" x2="420" y1="{y - 4}" y2="{y - 4}" stroke="{LINE}" stroke-dasharray="2 4"/>'
-              f'<text x="470" y="{y + 2}" class="d" font-size="22" fill="{Y if i == 1 else "#FFFFFF"}" text-anchor="end">{v}</text></g>')
+              f'<line x1="{80 + len(k) * 7.7:.0f}" x2="282" y1="{y - 4}" y2="{y - 4}" stroke="{LINE}" stroke-dasharray="2 4"/>'
+              f'<text x="320" y="{y + 2}" class="d" font-size="22" fill="{Y if i == 1 else "#FFFFFF"}" text-anchor="end">{v}</text></g>')
+    gx, gy = 410, 160
+    gh = (ring(gx, gy, R, 'loop', f' stroke-dasharray="{circ * 0.28:.1f} {circ * 0.72:.1f}"') +
+          f'<g class="beat" style="transform-origin:{gx}px {gy}px"><g transform="translate({gx - 22.8} {gy - 22.8}) scale(1.9)">'
+          f'<path d="{GH_MARK}" fill="{SIL}"/></g></g>'
+          f'<text x="{gx}" y="{gy + R + 34}" class="m" font-size="11" fill="{Y}" text-anchor="middle">@{USER}</text>')
 
     # ---- panel B: languages
     total = sum(s['langs'].values()) or 1
     top = sorted(s['langs'].items(), key=lambda kv: -kv[1])[:5]
     b = ''
     if not top:
-        b = f'<text x="530" y="150" class="m" font-size="13" fill="{DIM}">NO CODE DETECTED YET...</text>'
+        b = f'<text x="510" y="150" class="m" font-size="13" fill="{DIM}">NO CODE DETECTED YET...</text>'
     for i, (name, size) in enumerate(top):
         pct = size * 100 / total
         y = 98 + i * 36
-        w = max(4, 630 * pct / 100)
+        w = max(4, 300 * pct / 100)
         col = Y if i == 0 else SIL
-        b += (f'<text x="530" y="{y}" class="m" font-size="13" fill="{SIL}">{esc(name.upper())}</text>'
-              f'<text x="1160" y="{y}" class="m" font-size="13" fill="{col}" text-anchor="end">{pct:.1f}%</text>'
-              f'<rect x="530" y="{y + 7}" width="630" height="6" fill="#1E1E1E"/>'
-              f'<rect x="530" y="{y + 7}" width="{w:.1f}" height="6" fill="{col}" class="grow" style="animation-delay:{0.3 + i * 0.15:.2f}s"/>')
+        b += (f'<text x="510" y="{y}" class="m" font-size="13" fill="{SIL}">{esc(name.upper())}</text>'
+              f'<text x="810" y="{y}" class="m" font-size="13" fill="{col}" text-anchor="end">{pct:.1f}%</text>'
+              f'<rect x="510" y="{y + 7}" width="300" height="6" fill="#1E1E1E"/>'
+              f'<rect x="510" y="{y + 7}" width="{w:.1f}" height="6" fill="{col}" class="grow" style="animation-delay:{0.3 + i * 0.15:.2f}s"/>')
+
+    # ---- panel C: streak ring with flame
+    sx, sy = 1005, 138
+    fill = min(1.0, cur / max(lng, 7))
+    cur_range = f'{nice(cs)} – {nice(ce)}' if cur else 'START TODAY'
+    st = (ring(sx, sy, R, 'arc') +
+          f'<g transform="translate({sx} {sy - R})"><circle r="15" fill="{PNL}"/><path d="{FLAME}" fill="{Y}" class="fire"/></g>'
+          f'<text x="{sx}" y="{sy + 14}" class="d pop" font-size="38" fill="#FFFFFF" text-anchor="middle">{cur}</text>'
+          f'<text x="{sx}" y="{sy + R + 30}" class="d" font-size="16" fill="{Y}" text-anchor="middle">Current Streak</text>'
+          f'<text x="{sx}" y="{sy + R + 48}" class="m" font-size="11" fill="{DIM}" text-anchor="middle">{cur_range}</text>')
 
     frame = 'M10 10H700L726 36H1190V262L1162 290H10Z'
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">
 <defs><style>{font_face('HUD', 'chakra-petch-700.woff2')}{font_face('MONO', 'share-tech-mono-400.woff2')}
 .d{{font-family:'HUD',sans-serif;font-weight:700}}.m{{font-family:'MONO',monospace}}
 .row{{opacity:0;animation:fade .5s ease forwards}}@keyframes fade{{to{{opacity:1}}}}
+.pop{{opacity:0;animation:fade .6s ease .5s forwards}}
 .grow{{transform-box:fill-box;transform-origin:left;transform:scaleX(0);animation:grow 1.2s ease-out forwards}}@keyframes grow{{to{{transform:scaleX(1)}}}}
+.spin{{animation:spin 24s linear infinite}}@keyframes spin{{to{{transform:rotate(360deg)}}}}
+.arc{{stroke-dasharray:{circ:.1f};stroke-dashoffset:{circ:.1f};animation:arc 1.6s ease-out .3s forwards}}@keyframes arc{{to{{stroke-dashoffset:{circ * (1 - fill):.1f}}}}}
+.loop{{animation:loop 3s linear infinite}}@keyframes loop{{to{{stroke-dashoffset:-{circ:.1f}}}}}
+.beat{{animation:beat 2.4s ease-in-out infinite}}@keyframes beat{{0%,100%{{transform:scale(1)}}50%{{transform:scale(1.08)}}}}
+.fire{{transform-origin:0 6px;animation:fire 1.4s ease-in-out infinite alternate}}@keyframes fire{{from{{transform:scale(1)}}to{{transform:scale(1.15) translateY(-1px)}}}}
 .blink{{animation:blink 1.2s steps(1) infinite}}@keyframes blink{{50%{{opacity:0}}}}
 .flow{{stroke-dasharray:60 1400;animation:flow 6s linear infinite}}@keyframes flow{{from{{stroke-dashoffset:1460}}to{{stroke-dashoffset:0}}}}
-.pulse{{animation:pulse 2.4s ease-in-out infinite}}@keyframes pulse{{0%,100%{{opacity:.35}}50%{{opacity:1}}}}
 </style>
 <pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><rect width="1.4" height="1.4" fill="#262626"/></pattern></defs>
 <path d="{frame}" fill="{PNL}" stroke="{LINE}" stroke-width="1.5"/>
@@ -180,22 +222,30 @@ def build(s):
 <!-- A: telemetry -->
 <text x="40" y="52" class="m" font-size="13" fill="{DIM}">&gt;</text>
 <text x="56" y="52" class="d" font-size="16" fill="{Y}" letter-spacing="3">GITHUB_TELEMETRY</text>
-<line x1="40" y1="66" x2="480" y2="66" stroke="{LINE}"/>
+<line x1="40" y1="66" x2="470" y2="66" stroke="{LINE}"/>
 {a}
+{gh}
 
-<line x1="505" y1="40" x2="505" y2="262" stroke="{LINE}"/>
+<line x1="490" y1="40" x2="490" y2="262" stroke="{LINE}"/>
 <!-- B: languages -->
-<text x="530" y="52" class="d" font-size="16" fill="{Y}" letter-spacing="3">LANG_MATRIX</text>
-<line x1="530" y1="66" x2="1160" y2="66" stroke="{LINE}"/>
+<text x="510" y="52" class="d" font-size="16" fill="{Y}" letter-spacing="3">LANG_MATRIX</text>
+<line x1="510" y1="66" x2="810" y2="66" stroke="{LINE}"/>
 {b}
 
+<line x1="832" y1="40" x2="832" y2="262" stroke="{LINE}"/>
+<!-- C: streak -->
+<text x="852" y="52" class="d" font-size="16" fill="{Y}" letter-spacing="3">STREAK</text>
 <circle cx="1160" cy="47" r="4" fill="{Y}" class="blink"/>
-<text x="40" y="284" class="m" font-size="10" fill="{DIM}" letter-spacing="2">SYNC // {dt.date.today().isoformat()} // AUTO-UPDATED DAILY</text>
+{st}
+<text x="852" y="276" class="m" font-size="11" fill="{SIL}">LONGEST : <tspan fill="#FFFFFF">{lng}</tspan></text>
+<text x="1160" y="276" class="m" font-size="11" fill="{SIL}" text-anchor="end">TOTAL 1Y : <tspan fill="#FFFFFF">{s["total"]}</tspan></text>
+
+<text x="40" y="284" class="m" font-size="10" fill="{DIM}" letter-spacing="2">SYNC // {dt.date.today().isoformat()} // AUTO-UPDATED</text>
 </svg>'''
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, 'w') as fh:
         fh.write(svg)
-    print('wrote', OUT, f'{len(svg) // 1024} KB | streak', cur, '| longest', longest)
+    print('wrote', OUT, f'{len(svg) // 1024} KB | streak', cur, cur_range, '| longest', lng)
 
 
 def streak_info(days):
@@ -228,64 +278,6 @@ def streak_info(days):
 
 def nice(d):
     return dt.date.fromisoformat(d).strftime('%b %-d') if d else '—'
-
-
-def build_streak(s):
-    """3-column streak card: total · current streak ring · longest -> profile-stats/streak.svg"""
-    cur, cs, ce, (lng, ls, le), first = streak_info(s['days'])
-    W, H = 1200, 240
-    cx, cy, r = 600, 104, 52
-    circ = 2 * 3.14159 * r
-    fill = min(1.0, cur / max(lng, 7))
-    flame = ('M0 -16 C6 -8 10 -3 10 4 C10 11 5 16 0 16 C-5 16 -10 11 -10 4 C-10 -2 -6 -6 -4 -10 '
-             'C-3 -5 -1 -3 1 -2 C2 -7 1 -12 0 -16 Z')
-    frame = 'M10 10H520L546 36H1190V202L1162 230H10Z'
-    cur_range = f'{nice(cs)} – {nice(ce)}' if cur else 'START TODAY'
-    lng_range = f'{nice(ls)} – {nice(le)}' if lng else '—'
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">
-<defs><style>{font_face('HUD', 'chakra-petch-700.woff2')}{font_face('MONO', 'share-tech-mono-400.woff2')}
-.d{{font-family:'HUD',sans-serif;font-weight:700}}.m{{font-family:'MONO',monospace}}
-.fade{{opacity:0;animation:fade .7s ease forwards}}@keyframes fade{{to{{opacity:1}}}}
-.arc{{stroke-dasharray:{circ:.1f};stroke-dashoffset:{circ:.1f};animation:arc 1.6s ease-out .3s forwards}}@keyframes arc{{to{{stroke-dashoffset:{circ * (1 - fill):.1f}}}}}
-.fire{{transform-origin:{cx}px {cy - r}px;animation:fire 1.4s ease-in-out infinite alternate}}@keyframes fire{{from{{transform:scale(1)}}to{{transform:scale(1.15) translateY(-1px)}}}}
-.spin{{transform-origin:{cx}px {cy}px;animation:spin 24s linear infinite}}@keyframes spin{{to{{transform:rotate(360deg)}}}}
-.flow{{stroke-dasharray:60 1400;animation:flow 6s linear infinite}}@keyframes flow{{from{{stroke-dashoffset:1460}}to{{stroke-dashoffset:0}}}}
-</style>
-<pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><rect width="1.4" height="1.4" fill="#262626"/></pattern></defs>
-<path d="{frame}" fill="{PNL}" stroke="{LINE}" stroke-width="1.5"/>
-<path d="{frame}" fill="url(#dots)"/>
-<path d="M10 10H520L546 36H1190" fill="none" stroke="{Y}" stroke-width="1.5" class="flow"/>
-
-<!-- total -->
-<g class="fade" style="animation-delay:.1s">
-<text x="210" y="112" class="d" font-size="46" fill="#FFFFFF" text-anchor="middle">{s["total"]}</text>
-<text x="210" y="146" class="m" font-size="15" fill="{SIL}" text-anchor="middle">Total Contributions</text>
-<text x="210" y="172" class="m" font-size="12" fill="{DIM}" text-anchor="middle">{nice(first)}, {first[:4]} – Present</text>
-</g>
-<line x1="405" y1="50" x2="405" y2="190" stroke="{LINE}"/>
-
-<!-- current streak -->
-<g class="spin">{''.join(f'<line x1="{cx}" y1="{cy - r - 14}" x2="{cx}" y2="{cy - r - (8 if i % 3 else 4)}" stroke="{Y if i % 6 == 0 else "#3a3a3a"}" stroke-width="2" transform="rotate({i * 10} {cx} {cy})"/>' for i in range(36))}</g>
-<circle cx="{cx}" cy="{cy}" r="{r}" fill="{BLK}" stroke="#2a2a2a" stroke-width="6"/>
-<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{Y}" stroke-width="6" stroke-linecap="round" class="arc" transform="rotate(-90 {cx} {cy})"/>
-<g transform="translate({cx} {cy - r})"><circle r="15" fill="{PNL}"/><path d="{flame}" fill="{Y}" class="fire"/></g>
-<text x="{cx}" y="{cy + 14}" class="d fade" font-size="40" fill="#FFFFFF" text-anchor="middle" style="animation-delay:.4s">{cur}</text>
-<text x="{cx}" y="{cy + r + 32}" class="d" font-size="17" fill="{Y}" text-anchor="middle" letter-spacing="1">Current Streak</text>
-<text x="{cx}" y="{cy + r + 54}" class="m" font-size="12" fill="{DIM}" text-anchor="middle">{cur_range}</text>
-<line x1="795" y1="50" x2="795" y2="190" stroke="{LINE}"/>
-
-<!-- longest streak -->
-<g class="fade" style="animation-delay:.25s">
-<text x="990" y="112" class="d" font-size="46" fill="#FFFFFF" text-anchor="middle">{lng}</text>
-<text x="990" y="146" class="m" font-size="15" fill="{SIL}" text-anchor="middle">Longest Streak</text>
-<text x="990" y="172" class="m" font-size="12" fill="{DIM}" text-anchor="middle">{lng_range}</text>
-</g>
-<text x="40" y="222" class="m" font-size="10" fill="{DIM}" letter-spacing="2">STREAK // SRI LANKA TIME // AUTO-UPDATED</text>
-</svg>'''
-    out = os.path.join(ROOT, 'profile-stats', 'streak.svg')
-    with open(out, 'w') as fh:
-        fh.write(svg)
-    print('wrote', out, f'{len(svg) // 1024} KB | current', cur, cur_range, '| longest', lng, lng_range)
 
 
 LEVELS = ['#1C1C1C', '#4A3E00', '#8A7200', '#C9A600', '#FFD600']
@@ -467,6 +459,5 @@ if __name__ == '__main__':
     else:
         data = fetch()
     build(data)
-    build_streak(data)
     build_calendar(data)
     build_activity(data)

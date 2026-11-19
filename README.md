@@ -31,7 +31,6 @@
 <!-- ═══════════════ 03 STATS ═══════════════ -->
 <img src="./assets/sec-stats.svg" width="100%"/>
 <p align="center"><img src="./profile-stats/stats.svg" width="100%" alt="system stats"/></p>
-<p align="center"><img src="./profile-stats/streak.svg" width="100%" alt="streak"/></p>
 
 <img src="./assets/divider.svg" width="100%"/>
 
