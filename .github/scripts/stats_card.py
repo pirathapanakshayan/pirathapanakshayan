@@ -21,6 +21,11 @@ query($login:String!){
     contributionsCollection{
       totalCommitContributions
       restrictedContributionsCount
+      totalIssueContributions
+      totalPullRequestContributions
+      totalPullRequestReviewContributions
+      totalRepositoryContributions
+      hasAnyRestrictedContributions
       contributionCalendar{ totalContributions weeks{ contributionDays{ date contributionCount } } }
     }
     repositories(ownerAffiliations:OWNER,isFork:false,first:100){
@@ -40,6 +45,9 @@ def fetch():
         raise SystemExit('GraphQL error: ' + json.dumps(data['errors']))
     u = data['data']['user']
     cc = u['contributionsCollection']
+    print('DEBUG token:', 'STATS_TOKEN' if os.environ.get('STATS_TOKEN') else 'GITHUB_TOKEN',
+          {k: v for k, v in cc.items() if k != 'contributionCalendar'},
+          'calendar total:', cc['contributionCalendar']['totalContributions'])
     days = [d for w in cc['contributionCalendar']['weeks'] for d in w['contributionDays']]
     langs = {}
     stars = 0
