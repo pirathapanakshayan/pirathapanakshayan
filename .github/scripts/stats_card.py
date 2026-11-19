@@ -175,7 +175,10 @@ def build(s):
 
     # ---- panel B: languages
     total = sum(s['langs'].values()) or 1
-    top = sorted(s['langs'].items(), key=lambda kv: -kv[1])[:5]
+    # pinned languages are always listed first (real percentages are kept)
+    pin = [l.strip() for l in os.environ.get('PIN_LANGS', 'Python').split(',') if l.strip()]
+    ranked = sorted(s['langs'].items(), key=lambda kv: -kv[1])
+    top = ([kv for l in pin for kv in ranked if kv[0] == l] + [kv for kv in ranked if kv[0] not in pin])[:5]
     b = ''
     if not top:
         b = f'<text x="510" y="150" class="m" font-size="13" fill="{DIM}">NO CODE DETECTED YET...</text>'
