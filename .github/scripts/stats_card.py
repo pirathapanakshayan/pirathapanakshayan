@@ -155,17 +155,12 @@ def build(s):
     for i, (name, size) in enumerate(top):
         pct = size * 100 / total
         y = 98 + i * 36
-        w = max(4, 300 * pct / 100)
+        w = max(4, 630 * pct / 100)
         col = Y if i == 0 else SIL
         b += (f'<text x="530" y="{y}" class="m" font-size="13" fill="{SIL}">{esc(name.upper())}</text>'
-              f'<text x="836" y="{y}" class="m" font-size="13" fill="{col}" text-anchor="end">{pct:.1f}%</text>'
-              f'<rect x="530" y="{y + 7}" width="306" height="6" fill="#1E1E1E"/>'
-              f'<rect x="530" y="{y + 7}" width="{w * 306 / 300:.1f}" height="6" fill="{col}" class="grow" style="animation-delay:{0.3 + i * 0.15:.2f}s"/>')
-
-    # ---- panel C: streak ring
-    ring_ticks = ''.join(
-        f'<line x1="1022" y1="{70 if i % 3 else 64}" x2="1022" y2="76" stroke="{Y if i % 3 == 0 else DIM}" stroke-width="2" transform="rotate({i * 10} 1022 140)"/>'
-        for i in range(36))
+              f'<text x="1160" y="{y}" class="m" font-size="13" fill="{col}" text-anchor="end">{pct:.1f}%</text>'
+              f'<rect x="530" y="{y + 7}" width="630" height="6" fill="#1E1E1E"/>'
+              f'<rect x="530" y="{y + 7}" width="{w:.1f}" height="6" fill="{col}" class="grow" style="animation-delay:{0.3 + i * 0.15:.2f}s"/>')
 
     frame = 'M10 10H700L726 36H1190V262L1162 290H10Z'
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">
@@ -173,7 +168,6 @@ def build(s):
 .d{{font-family:'HUD',sans-serif;font-weight:700}}.m{{font-family:'MONO',monospace}}
 .row{{opacity:0;animation:fade .5s ease forwards}}@keyframes fade{{to{{opacity:1}}}}
 .grow{{transform-box:fill-box;transform-origin:left;transform:scaleX(0);animation:grow 1.2s ease-out forwards}}@keyframes grow{{to{{transform:scaleX(1)}}}}
-.spin{{transform-origin:1022px 140px;animation:spin 20s linear infinite}}@keyframes spin{{to{{transform:rotate(360deg)}}}}
 .blink{{animation:blink 1.2s steps(1) infinite}}@keyframes blink{{50%{{opacity:0}}}}
 .flow{{stroke-dasharray:60 1400;animation:flow 6s linear infinite}}@keyframes flow{{from{{stroke-dashoffset:1460}}to{{stroke-dashoffset:0}}}}
 .pulse{{animation:pulse 2.4s ease-in-out infinite}}@keyframes pulse{{0%,100%{{opacity:.35}}50%{{opacity:1}}}}
@@ -192,29 +186,106 @@ def build(s):
 <line x1="505" y1="40" x2="505" y2="262" stroke="{LINE}"/>
 <!-- B: languages -->
 <text x="530" y="52" class="d" font-size="16" fill="{Y}" letter-spacing="3">LANG_MATRIX</text>
-<line x1="530" y1="66" x2="836" y2="66" stroke="{LINE}"/>
+<line x1="530" y1="66" x2="1160" y2="66" stroke="{LINE}"/>
 {b}
 
-<line x1="862" y1="40" x2="862" y2="262" stroke="{LINE}"/>
-<!-- C: streak -->
-<text x="886" y="52" class="d" font-size="16" fill="{Y}" letter-spacing="3">STREAK</text>
 <circle cx="1160" cy="47" r="4" fill="{Y}" class="blink"/>
-<g class="spin">{ring_ticks}</g>
-<circle cx="1022" cy="140" r="56" fill="{BLK}" stroke="{Y}" stroke-width="2"/>
-<circle cx="1022" cy="140" r="48" fill="none" stroke="{DIM}" stroke-dasharray="2 6"/>
-<text x="1022" y="150" class="d" font-size="38" fill="#FFFFFF" text-anchor="middle">{cur}</text>
-<text x="1022" y="168" class="m" font-size="10" fill="{Y}" text-anchor="middle">DAY{"S" if cur != 1 else ""}</text>
-<text x="1022" y="242" class="m" font-size="12" fill="{Y}" text-anchor="middle">CURRENT STREAK</text>
-<text x="886" y="270" class="m" font-size="11" fill="{SIL}">LONGEST : <tspan fill="#FFFFFF">{longest}</tspan></text>
-<text x="1160" y="270" class="m" font-size="11" fill="{SIL}" text-anchor="end">TOTAL 1Y : <tspan fill="#FFFFFF">{s["total"]}</tspan></text>
-
 <text x="40" y="284" class="m" font-size="10" fill="{DIM}" letter-spacing="2">SYNC // {dt.date.today().isoformat()} // AUTO-UPDATED DAILY</text>
-<circle cx="1022" cy="140" r="62" fill="none" stroke="{Y}" stroke-width="1" class="pulse"/>
 </svg>'''
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, 'w') as fh:
         fh.write(svg)
     print('wrote', OUT, f'{len(svg) // 1024} KB | streak', cur, '| longest', longest)
+
+
+def streak_info(days):
+    """current & longest streak with their date ranges"""
+    today = dt.date.today().isoformat()
+    days = [d for d in sorted(days) if d[0] <= today]
+    best = (0, None, None)
+    run, start = 0, None
+    for d, c in days:
+        if c > 0:
+            run += 1
+            start = start or d
+            if run > best[0]:
+                best = (run, start, d)
+        else:
+            run, start = 0, None
+    seq = list(reversed(days))
+    if seq and seq[0][1] == 0:
+        seq = seq[1:]
+    cur, cur_end, cur_start = 0, None, None
+    for d, c in seq:
+        if c == 0:
+            break
+        cur += 1
+        cur_end = cur_end or d
+        cur_start = d
+    first = next((d for d, c in days if c > 0), days[0][0] if days else today)
+    return cur, cur_start, cur_end, best, first
+
+
+def nice(d):
+    return dt.date.fromisoformat(d).strftime('%b %-d') if d else '—'
+
+
+def build_streak(s):
+    """3-column streak card: total · current streak ring · longest -> profile-stats/streak.svg"""
+    cur, cs, ce, (lng, ls, le), first = streak_info(s['days'])
+    W, H = 1200, 240
+    cx, cy, r = 600, 104, 52
+    circ = 2 * 3.14159 * r
+    fill = min(1.0, cur / max(lng, 7))
+    flame = ('M0 -16 C6 -8 10 -3 10 4 C10 11 5 16 0 16 C-5 16 -10 11 -10 4 C-10 -2 -6 -6 -4 -10 '
+             'C-3 -5 -1 -3 1 -2 C2 -7 1 -12 0 -16 Z')
+    frame = 'M10 10H520L546 36H1190V202L1162 230H10Z'
+    cur_range = f'{nice(cs)} – {nice(ce)}' if cur else 'START TODAY'
+    lng_range = f'{nice(ls)} – {nice(le)}' if lng else '—'
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">
+<defs><style>{font_face('HUD', 'chakra-petch-700.woff2')}{font_face('MONO', 'share-tech-mono-400.woff2')}
+.d{{font-family:'HUD',sans-serif;font-weight:700}}.m{{font-family:'MONO',monospace}}
+.fade{{opacity:0;animation:fade .7s ease forwards}}@keyframes fade{{to{{opacity:1}}}}
+.arc{{stroke-dasharray:{circ:.1f};stroke-dashoffset:{circ:.1f};animation:arc 1.6s ease-out .3s forwards}}@keyframes arc{{to{{stroke-dashoffset:{circ * (1 - fill):.1f}}}}}
+.fire{{transform-origin:{cx}px {cy - r}px;animation:fire 1.4s ease-in-out infinite alternate}}@keyframes fire{{from{{transform:scale(1)}}to{{transform:scale(1.15) translateY(-1px)}}}}
+.spin{{transform-origin:{cx}px {cy}px;animation:spin 24s linear infinite}}@keyframes spin{{to{{transform:rotate(360deg)}}}}
+.flow{{stroke-dasharray:60 1400;animation:flow 6s linear infinite}}@keyframes flow{{from{{stroke-dashoffset:1460}}to{{stroke-dashoffset:0}}}}
+</style>
+<pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><rect width="1.4" height="1.4" fill="#262626"/></pattern></defs>
+<path d="{frame}" fill="{PNL}" stroke="{LINE}" stroke-width="1.5"/>
+<path d="{frame}" fill="url(#dots)"/>
+<path d="M10 10H520L546 36H1190" fill="none" stroke="{Y}" stroke-width="1.5" class="flow"/>
+
+<!-- total -->
+<g class="fade" style="animation-delay:.1s">
+<text x="210" y="112" class="d" font-size="46" fill="#FFFFFF" text-anchor="middle">{s["total"]}</text>
+<text x="210" y="146" class="m" font-size="15" fill="{SIL}" text-anchor="middle">Total Contributions</text>
+<text x="210" y="172" class="m" font-size="12" fill="{DIM}" text-anchor="middle">{nice(first)}, {first[:4]} – Present</text>
+</g>
+<line x1="405" y1="50" x2="405" y2="190" stroke="{LINE}"/>
+
+<!-- current streak -->
+<g class="spin">{''.join(f'<line x1="{cx}" y1="{cy - r - 14}" x2="{cx}" y2="{cy - r - (8 if i % 3 else 4)}" stroke="{Y if i % 6 == 0 else "#3a3a3a"}" stroke-width="2" transform="rotate({i * 10} {cx} {cy})"/>' for i in range(36))}</g>
+<circle cx="{cx}" cy="{cy}" r="{r}" fill="{BLK}" stroke="#2a2a2a" stroke-width="6"/>
+<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{Y}" stroke-width="6" stroke-linecap="round" class="arc" transform="rotate(-90 {cx} {cy})"/>
+<g transform="translate({cx} {cy - r})"><circle r="15" fill="{PNL}"/><path d="{flame}" fill="{Y}" class="fire"/></g>
+<text x="{cx}" y="{cy + 14}" class="d fade" font-size="40" fill="#FFFFFF" text-anchor="middle" style="animation-delay:.4s">{cur}</text>
+<text x="{cx}" y="{cy + r + 32}" class="d" font-size="17" fill="{Y}" text-anchor="middle" letter-spacing="1">Current Streak</text>
+<text x="{cx}" y="{cy + r + 54}" class="m" font-size="12" fill="{DIM}" text-anchor="middle">{cur_range}</text>
+<line x1="795" y1="50" x2="795" y2="190" stroke="{LINE}"/>
+
+<!-- longest streak -->
+<g class="fade" style="animation-delay:.25s">
+<text x="990" y="112" class="d" font-size="46" fill="#FFFFFF" text-anchor="middle">{lng}</text>
+<text x="990" y="146" class="m" font-size="15" fill="{SIL}" text-anchor="middle">Longest Streak</text>
+<text x="990" y="172" class="m" font-size="12" fill="{DIM}" text-anchor="middle">{lng_range}</text>
+</g>
+<text x="40" y="222" class="m" font-size="10" fill="{DIM}" letter-spacing="2">STREAK // SRI LANKA TIME // AUTO-UPDATED</text>
+</svg>'''
+    out = os.path.join(ROOT, 'profile-stats', 'streak.svg')
+    with open(out, 'w') as fh:
+        fh.write(svg)
+    print('wrote', out, f'{len(svg) // 1024} KB | current', cur, cur_range, '| longest', lng, lng_range)
 
 
 LEVELS = ['#1C1C1C', '#4A3E00', '#8A7200', '#C9A600', '#FFD600']
@@ -396,5 +467,6 @@ if __name__ == '__main__':
     else:
         data = fetch()
     build(data)
+    build_streak(data)
     build_calendar(data)
     build_activity(data)
